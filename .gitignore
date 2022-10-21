@@ -1,0 +1,6 @@
+# exclude
+__pycache__/
+data/*
+!data/.same1.xml
+!data/.same2.xml
+!data/.different.xml
