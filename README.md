@@ -4,6 +4,8 @@ This project is aimed at easily comparing two xml files. Most common xml compara
 turn out not to be real differences but variations in the order of some parameters. The methods provided ensure a good reading and comparing without taking into account
 such parasite differences.
 
+Caveat: the program does not display differences. It only returns if files are identical or not.
+
 ## Examples of possible differences which do not impact the comparison
 ```xml
 <somecontent>
