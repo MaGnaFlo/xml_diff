@@ -9,7 +9,7 @@ if __name__ == "__main__":
 	xml1 = Xml.get(file1)
 	xml2 = Xml.get(file2)
 
-	options = {"ignore_json_order":False}
+	options = {"ignore_json_order":True}
 
 	identical = XmlDiff.process(xml1, xml2, options)
 	if identical:

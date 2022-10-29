@@ -49,18 +49,18 @@ class XmlDiff:
 		
 		# check the subnodes
 		for subnode_name in node1.children:
-			found_child = self.corresponding_child(subnode_name, node2)
+			candidates = self.corresponding_children(subnode_name, node2)
 
-			if found_child is None:
+			if len(candidates) == 0:
 				return False
-			else:
-				# compare contents
-				identical = identical and self.diff_content(node1.children[subnode_name], node2.children[found_child])
-				if not identical:
-					return False
 
-				# recursively check subnodes
-				identical = identical and self.diff_node(node1.children[subnode_name], node2.children[found_child])
+			identical_content_node = False
+			for ind, found_child in enumerate(candidates):
+				identical_content = self.diff_content(node1.children[subnode_name], node2.children[found_child])
+				identical_node = self.diff_node(node1.children[subnode_name], node2.children[found_child])
+				identical_content_node = identical_content_node or (identical_content and identical_node)
+
+			identical = identical and identical_content_node
 				
 		return identical
 	
@@ -80,6 +80,7 @@ class XmlDiff:
 			identical = identical and found
 
 		return identical
+
 
 	""" [recursive]
 		Processes the difference between two single contents
@@ -146,15 +147,14 @@ class XmlDiff:
 
 			return True, line1, line2
 
-	""" Returns the child in a Node corresponding to the name of a child of another node.
+	""" Returns the list of children in a Node corresponding to the name of a child of another node.
 		subnode_name1: name of the query child
 		node2: target node
 	"""
-	def corresponding_child(self, subnode_name1, node2):
-		found_child = None
+	def corresponding_children(self, subnode_name1, node2):
+		candidates = []
 		for child in node2.children:
 			found, name1, name2 = self.diff_line(subnode_name1, child)
 			if found:
-				found_child = name2
-				break
-		return found_child
+				candidates.append(name2)
+		return candidates
