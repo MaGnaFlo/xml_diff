@@ -7,7 +7,7 @@
  
 <hi>
 <somecontent>
-<data  expr="{'ParameterType':'Float','hello:5'}" id="ENV_IRS.1"/>
+<data  expr="{'hello:5','ParameterType':'Float'}" id="ENV_IRS.1"/>
 <data  expr="{'ParameterType':'Float'}" id="ENV_IRS.1.M312IRS1"/>
 </somecontent>
 </hi>

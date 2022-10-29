@@ -1,18 +1,17 @@
 from xml_base import Xml
 from xml_diff import XmlDiff
-import argparse
 
 if __name__ == "__main__":
 
-	parser = argparse.ArgumentParser()
-	parser.add_argument("--xml1", type=str, help="original xml file")
-	parser.add_argument("--xml2", type=str, help="xml file to be compared")
-	args = parser.parse_args()
+	file1 = "data/same1.xml"
+	file2 = "data/same2.xml"
 
-	xml1 = Xml.get(args.xml1)
-	xml2 = Xml.get(args.xml2)
+	xml1 = Xml.get(file1)
+	xml2 = Xml.get(file2)
 
-	identical = XmlDiff.process(xml1, xml2)
+	options = {"ignore_json_order":False}
+
+	identical = XmlDiff.process(xml1, xml2, options)
 	if identical:
 		print("Files are identical!")
 	else:
