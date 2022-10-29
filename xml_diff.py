@@ -14,16 +14,24 @@ import re
 """
 class XmlDiff:
 	""" xml1, xml2: Xml objects"""
-	def __init__(self, xml1, xml2):
+	def __init__(self, xml1, xml2, options=None):
+		self.set_options(options)
 		self.identical = self.diff_node(xml1.xml, xml2.xml)
+		
+	""" Setting the options
+		ignore_json_order: boolean; True if json order needs to be ignored
+	"""
+	def set_options(self, options=None):
+		if options != None:
+			self.ignore_json_order = options["ignore_json_order"]
 
 	""" Principal result getter 
 		xml1, xml2: Xml objects
 		returns the identical attribute
 	"""
 	@classmethod
-	def process(cls, xml1, xml2):
-		diff_obj = cls(xml1, xml2)
+	def process(cls, xml1, xml2, options=None):
+		diff_obj = cls(xml1, xml2, options)
 		return diff_obj.identical
 
 	""" [recursive]
@@ -34,23 +42,29 @@ class XmlDiff:
 		if len(node1) != len(node2):
 			return False
 
+		# check the nodes' name themselves
 		identical, _, _ = self.diff_line(node1.name, node2.name)
 		if not identical:
 			return False
 		
+		# check the subnodes
 		for subnode_name in node1.children:
 			found_child = self.corresponding_child(subnode_name, node2)
 
 			if found_child is None:
 				return False
 			else:
+				# compare contents
 				identical = identical and self.diff_content(node1.children[subnode_name], node2.children[found_child])
 				if not identical:
 					return False
+
+				# recursively check subnodes
 				identical = identical and self.diff_node(node1.children[subnode_name], node2.children[found_child])
 				
 		return identical
 	
+
 	""" Process the difference between two node's list of contents
 		node1, node2: Node objects
 		returns boolean (True is identical)
@@ -72,6 +86,7 @@ class XmlDiff:
 		line1, line2: strings of the content
 	"""
 	def diff_line(self, line1, line2, sep=" "):
+		# check the line's key
 		if sep == " ":
 			s = re.search(sep, line1)
 			if s is not None:
@@ -79,6 +94,7 @@ class XmlDiff:
 				start_keyword1 = line1[:span[1]]
 				start_keyword2 = line2[:span[1]]
 
+				# compare keys
 				if start_keyword1 != start_keyword2:
 					return False, None, None
 				else:
@@ -91,22 +107,26 @@ class XmlDiff:
 			line1_ = line1
 			line2_ = line2
 
+		# break down the lines
 		blocks1 = line1_.split(sep)
 		blocks2 = line2_.split(sep)
 
+		# compare lengths of arguments
 		if len(blocks1) != len(blocks2):
 			return False, None, None
 
+		# check correspondences between arguments
 		else:
 			for b1 in blocks1:
 				found_in_blocks2 = False
 				if b1 in blocks2:
 					found_in_blocks2 = True
 
-				else:
+				# processing json expressions
+				elif self.ignore_json_order:
 					for b2 in blocks2:
 						s1, s2 = None, None
-						if "expr=" in b1:
+						if re.search(r'="{.*}"$', b1) is not None:
 							s1 = re.search(r'{.*}"$', b1)
 							s2 = re.search(r'{.*}"$', b2)
 
